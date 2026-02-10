@@ -385,7 +385,7 @@
         <div class="sticky bottom-6 w-full flex justify-end px-6 pointer-events-none">
             <button id="music-toggle"
                 class="pointer-events-auto bg-white/10 backdrop-blur-md border border-white/20 text-royal-cream p-3 rounded-full shadow-lg hover:bg-white/20 transition-all animate-pulse transform hover:scale-105 active:scale-95">
-                <span class="material-symbols-outlined" id="music-icon">music_note</span>
+                <span class="material-symbols-outlined" id="music-icon">play_arrow</span>
             </button>
         </div>
     </div>
@@ -449,11 +449,12 @@
             if (playPromise !== undefined) {
                 playPromise.then(_ => {
                     isPlaying = true;
+                    musicIcon.textContent = 'pause';
                     musicBtn.classList.add('animate-pulse', 'bg-primary/50');
                 }).catch(error => {
                     console.log("Autoplay prevented by browser");
                     isPlaying = false;
-                    musicIcon.textContent = 'music_off';
+                    musicIcon.textContent = 'play_arrow';
                 });
             }
         }
@@ -461,11 +462,11 @@
         function toggleMusic() {
             if (isPlaying) {
                 audio.pause();
-                musicIcon.textContent = 'music_off';
+                musicIcon.textContent = 'play_arrow';
                 musicBtn.classList.remove('animate-pulse', 'bg-primary/50');
             } else {
                 audio.play().catch(e => console.log("Audio play failed:", e));
-                musicIcon.textContent = 'music_note';
+                musicIcon.textContent = 'pause';
                 musicBtn.classList.add('animate-pulse', 'bg-primary/50');
             }
             isPlaying = !isPlaying;
