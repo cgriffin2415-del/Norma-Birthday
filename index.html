@@ -421,12 +421,19 @@
                 rsvpView.classList.remove('hidden');
                 rsvpView.classList.add('flex');
                 window.scrollTo(0, 0);
+
+                // Stop carousel when hidden
+                clearInterval(slideInterval);
             } else {
                 rsvpView.classList.add('hidden');
                 rsvpView.classList.remove('flex');
                 invitationView.classList.remove('hidden');
                 invitationView.classList.add('flex');
                 window.scrollTo(0, 0);
+
+                // Resume carousel and reset stuck state
+                isTransitioning = false;
+                startCarousel();
             }
         }
 
