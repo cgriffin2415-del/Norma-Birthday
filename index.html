@@ -619,35 +619,31 @@
             startCarousel();
         }
 
-        // Calendar Link Logic - Double Trigger Fix for Android Cold Start
-        function openCalendarLink(e) {
-            e.preventDefault();
-            const url = e.currentTarget.href;
-
-            // 1. Create a hidden iframe to "pre-load" the intent (waking up the app)
-            const iframe = document.createElement('iframe');
-            iframe.style.display = 'none';
-            document.body.appendChild(iframe);
-
-            // Attempt to load the URL in the background
-            iframe.src = url;
-
-            // 2. Wait 2.5 seconds for the app to wake up fully
-            setTimeout(() => {
-                // Cleanup
-                document.body.removeChild(iframe);
-
-                // 3. Navigate the main window (The real "Go")
-                window.location.href = url;
-            }, 2500);
-        }
-
-        // Attach to calendar link
+        // Android Intent Fix for Calendar Deep Linking
+        // Instead of relying on the browser to hand off properly (which fails on cold start),
+        // we explicitly tell Android to open the Google Calendar app with the event data.
         document.addEventListener('DOMContentLoaded', () => {
-            const calendarLinks = document.querySelectorAll('a[href*="calendar.google.com"], a[href*="www.google.com/calendar"]');
-            calendarLinks.forEach(link => {
-                link.addEventListener('click', openCalendarLink);
-            });
+            const isAndroid = /Android/i.test(navigator.userAgent);
+
+            if (isAndroid) {
+                const calendarLinks = document.querySelectorAll('a[href*="calendar.google.com"], a[href*="www.google.com/calendar"]');
+
+                calendarLinks.forEach(link => {
+                    // Extract the query parameters from the existing URL
+                    const currentUrl = new URL(link.href);
+                    const params = currentUrl.search; // e.g. "?text=..."
+
+                    // Construct the intent URL
+                    // intent://<path>?<query>#Intent;scheme=https;package=com.google.android.calendar;end;
+                    // Path for eventedit is typically /calendar/r/eventedit
+
+                    // We use the "scheme=https" to allow fallback to browser if app isn't installed,
+                    // but the "package" forces the app if present.
+                    const intentUrl = `intent://calendar.google.com/calendar/r/eventedit${params}#Intent;scheme=https;package=com.google.android.calendar;end;`;
+
+                    link.href = intentUrl;
+                });
+            }
         });
 
         // Initialize
