@@ -619,6 +619,31 @@
             startCarousel();
         }
 
+        // Calendar Link Logic - Double Trigger Fix for Android Cold Start
+        function openCalendarLink(e) {
+            e.preventDefault();
+            const url = e.currentTarget.href;
+
+            // First trigger - wakes up the app (or opens browser tab)
+            window.location.href = url;
+
+            // Second trigger - 500ms later, hits the now-awake app to ensure data payload is received
+            setTimeout(() => {
+                window.location.href = url;
+            }, 500);
+        }
+
+        // Attach to calendar link
+        // We use event delegation or look up the link directly if it has an ID, 
+        // but since it's dynamic/in HTML, we can add the onclick attribute effectively or bind here.
+        // Let's find the link by its href content or class since it doesn't have a unique ID yet.
+        document.addEventListener('DOMContentLoaded', () => {
+            const calendarLinks = document.querySelectorAll('a[href*="calendar.google.com"]');
+            calendarLinks.forEach(link => {
+                link.addEventListener('click', openCalendarLink);
+            });
+        });
+
         // Initialize
         updateDots(currentIndex);
         startCarousel();
