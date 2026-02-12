@@ -619,9 +619,9 @@
             startCarousel();
         }
 
-        // Android Intent Fix for Calendar Deep Linking
-        // Instead of relying on the browser to hand off properly (which fails on cold start),
-        // we explicitly tell Android to open the Google Calendar app with the event data.
+        // Android Intent Fix for Calendar Deep Linking 2.0
+        // We use the specific ACTION_INSERT intent to directly command the Android OS to open the "Create Event" screen
+        // with the provided data payload. This bypasses the app's internal URL handling logic which can fail on cold start.
         document.addEventListener('DOMContentLoaded', () => {
             const isAndroid = /Android/i.test(navigator.userAgent);
 
@@ -629,17 +629,31 @@
                 const calendarLinks = document.querySelectorAll('a[href*="calendar.google.com"], a[href*="www.google.com/calendar"]');
 
                 calendarLinks.forEach(link => {
-                    // Extract the query parameters from the existing URL
-                    const currentUrl = new URL(link.href);
-                    const params = currentUrl.search; // e.g. "?text=..."
+                    // Event Details
+                    const title = "Norma's 80th Birthday Celebration";
+                    const location = "VYBZE Event Hall, Stonecrest, GA";
+                    const description = "Celebrating Norma's Diamond Jubilee!";
 
-                    // Construct the intent URL
-                    // intent://<path>?<query>#Intent;scheme=https;package=com.google.android.calendar;end;
-                    // Path for eventedit is typically /calendar/r/eventedit
+                    // Times must be in milliseconds for Android Intents
+                    // Start: April 11, 2026 8:00 PM EST -> April 12, 2026 00:00:00 UTC
+                    const startTime = new Date("2026-04-12T00:00:00Z").getTime();
 
-                    // We use the "scheme=https" to allow fallback to browser if app isn't installed,
-                    // but the "package" forces the app if present.
-                    const intentUrl = `intent://calendar.google.com/calendar/r/eventedit${params}#Intent;scheme=https;package=com.google.android.calendar;end;`;
+                    // End: April 11, 2026 12:00 AM EST (Next Day) -> April 12, 2026 04:00:00 UTC
+                    const endTime = new Date("2026-04-12T04:00:00Z").getTime();
+
+                    // Construct the Intent URI
+                    // intent://#Intent;action=android.intent.action.INSERT;type=vnd.android.cursor.item/event;...
+                    let intentUrl = "intent://#Intent;" +
+                        "action=android.intent.action.INSERT;" +
+                        "data=content://com.android.calendar/events;" + // Generic calendar provider URI
+                        "S.title=" + encodeURIComponent(title) + ";" +
+                        "S.description=" + encodeURIComponent(description) + ";" +
+                        "S.eventLocation=" + encodeURIComponent(location) + ";" +
+                        "l.beginTime=" + startTime + ";" +
+                        "l.endTime=" + endTime + ";" +
+                        "package=com.google.android.calendar;" + // Force Google Calendar app
+                        "S.browser_fallback_url=" + encodeURIComponent(link.href) + ";" + // Fallback to web link if app fails
+                        "end";
 
                     link.href = intentUrl;
                 });
