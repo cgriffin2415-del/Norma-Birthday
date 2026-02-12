@@ -210,7 +210,7 @@
                             data-icon="calendar_today">calendar_today</span>
                         <h2 class="text-royal-cream text-xl font-semibold tracking-tight">April 11th, 2026</h2>
                         <p class="text-royal-cream/60 text-sm">Saturday from 8:00 PM - 12:00 AM</p>
-                        <a href="https://calendar.google.com/calendar/r/eventedit?text=Norma%27s+80th+Birthday+Celebration&dates=20260412T000000Z/20260412T040000Z&details=Celebrating+Norma%27s+Diamond+Jubilee!&location=VYBZE+Event+Hall,+Stonecrest,+GA"
+                        <a href="https://www.google.com/calendar/render?action=TEMPLATE&text=Norma%27s+80th+Birthday+Celebration&dates=20260412T000000Z/20260412T040000Z&details=Celebrating+Norma%27s+Diamond+Jubilee!&location=VYBZE+Event+Hall,+Stonecrest,+GA"
                             class="text-primary text-xs hover:underline mt-1">Add to Calendar</a>
                     </div>
                     <div class="w-12 h-[1px] bg-primary/30 mx-auto"></div>
@@ -618,47 +618,6 @@
             clearInterval(slideInterval);
             startCarousel();
         }
-
-        // Android Intent Fix for Calendar Deep Linking 2.0
-        // We use the specific ACTION_INSERT intent to directly command the Android OS to open the "Create Event" screen
-        // with the provided data payload. This bypasses the app's internal URL handling logic which can fail on cold start.
-        document.addEventListener('DOMContentLoaded', () => {
-            const isAndroid = /Android/i.test(navigator.userAgent);
-
-            if (isAndroid) {
-                const calendarLinks = document.querySelectorAll('a[href*="calendar.google.com"], a[href*="www.google.com/calendar"]');
-
-                calendarLinks.forEach(link => {
-                    // Event Details
-                    const title = "Norma's 80th Birthday Celebration";
-                    const location = "VYBZE Event Hall, Stonecrest, GA";
-                    const description = "Celebrating Norma's Diamond Jubilee!";
-
-                    // Times must be in milliseconds for Android Intents
-                    // Start: April 11, 2026 8:00 PM EST -> April 12, 2026 00:00:00 UTC
-                    const startTime = new Date("2026-04-12T00:00:00Z").getTime();
-
-                    // End: April 11, 2026 12:00 AM EST (Next Day) -> April 12, 2026 04:00:00 UTC
-                    const endTime = new Date("2026-04-12T04:00:00Z").getTime();
-
-                    // Construct the Intent URI
-                    // intent://#Intent;action=android.intent.action.INSERT;type=vnd.android.cursor.item/event;...
-                    let intentUrl = "intent://#Intent;" +
-                        "action=android.intent.action.INSERT;" +
-                        "data=content://com.android.calendar/events;" + // Generic calendar provider URI
-                        "S.title=" + encodeURIComponent(title) + ";" +
-                        "S.description=" + encodeURIComponent(description) + ";" +
-                        "S.eventLocation=" + encodeURIComponent(location) + ";" +
-                        "l.beginTime=" + startTime + ";" +
-                        "l.endTime=" + endTime + ";" +
-                        "package=com.google.android.calendar;" + // Force Google Calendar app
-                        "S.browser_fallback_url=" + encodeURIComponent(link.href) + ";" + // Fallback to web link if app fails
-                        "end";
-
-                    link.href = intentUrl;
-                });
-            }
-        });
 
         // Initialize
         updateDots(currentIndex);
