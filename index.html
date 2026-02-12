@@ -624,21 +624,27 @@
             e.preventDefault();
             const url = e.currentTarget.href;
 
-            // First trigger - wakes up the app (or opens browser tab)
-            window.location.href = url;
+            // 1. Create a hidden iframe to "pre-load" the intent (waking up the app)
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
 
-            // Second trigger - 500ms later, hits the now-awake app to ensure data payload is received
+            // Attempt to load the URL in the background
+            iframe.src = url;
+
+            // 2. Wait 2.5 seconds for the app to wake up fully
             setTimeout(() => {
+                // Cleanup
+                document.body.removeChild(iframe);
+
+                // 3. Navigate the main window (The real "Go")
                 window.location.href = url;
-            }, 500);
+            }, 2500);
         }
 
         // Attach to calendar link
-        // We use event delegation or look up the link directly if it has an ID, 
-        // but since it's dynamic/in HTML, we can add the onclick attribute effectively or bind here.
-        // Let's find the link by its href content or class since it doesn't have a unique ID yet.
         document.addEventListener('DOMContentLoaded', () => {
-            const calendarLinks = document.querySelectorAll('a[href*="calendar.google.com"]');
+            const calendarLinks = document.querySelectorAll('a[href*="calendar.google.com"], a[href*="www.google.com/calendar"]');
             calendarLinks.forEach(link => {
                 link.addEventListener('click', openCalendarLink);
             });
